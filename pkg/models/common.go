@@ -1,6 +1,7 @@
 package models
 
 import (
+	"net/http"
 	"net/url"
 	"strconv"
 )
@@ -14,6 +15,31 @@ const (
 type CommonQueryParams struct {
 	Offset int
 	Limit  int
+}
+
+func NewCommonQueryParamsFromRequest(r *http.Request) (*CommonQueryParams, error) {
+	actorsQP := CommonQueryParams{
+		Limit:  LimitDefault,
+		Offset: OffsetDefault,
+	}
+
+	q := r.URL.Query()
+
+	if q.Has("limit") {
+		err := actorsQP.ValidateLimit(q)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if q.Has("offset") {
+		err := actorsQP.ValidateOffset(q)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &actorsQP, nil
 }
 
 func (a *CommonQueryParams) ValidateLimit(q url.Values) error {
