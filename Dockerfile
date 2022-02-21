@@ -2,11 +2,14 @@
 FROM golang:1.17.7-alpine3.15 as build
 
 WORKDIR /go/src/app
-ADD . /go/src/app
 
-RUN go get -d -v ./...
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -extldflags '-static'" -o /go/bin/app
+COPY . /go/src/app
+
+RUN CGO_ENABLED=0 go build -ldflags="-s -w -extldflags '-static'" -o /go/bin/app
 
 # Now copy it into our base image.
 FROM gcr.io/distroless/static-debian11
