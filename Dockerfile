@@ -9,7 +9,7 @@ RUN go get -d -v ./...
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -extldflags '-static'" -o /go/bin/app
 
 # Now copy it into our base image.
-FROM gcr.io/distroless/base-debian11
+FROM gcr.io/distroless/static-debian11
 
 COPY --from=build /go/bin/app /
 
