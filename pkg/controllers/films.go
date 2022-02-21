@@ -13,7 +13,7 @@ func FilmsAll(w http.ResponseWriter, r *http.Request) {
 		models.GetFilms(w, r)
 
 	default:
-		w.Header().Set("Allow", "Get")
+		w.Header().Set("Allow", "GET")
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 }
