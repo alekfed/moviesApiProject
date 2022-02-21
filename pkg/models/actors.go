@@ -32,11 +32,11 @@ func NewCreateActorInputFromRequest(r *http.Request) (*CreateActorInput, error) 
 	}
 
 	if input.FirstName == nil {
-		return nil, errors.New("First name is required")
+		return nil, errors.New(`"first_name" is required`)
 	}
 
 	if input.LastName == nil {
-		return nil, errors.New("Last name is required")
+		return nil, errors.New(`"last_name" is required`)
 	}
 
 	return &input, nil
@@ -49,7 +49,7 @@ func ValidateActorId(id string) error {
 	}
 
 	if parsedId < 1 {
-		return errors.New("id must be greater than 0")
+		return errors.New(`"id" must be greater than 0`)
 	}
 
 	return nil
