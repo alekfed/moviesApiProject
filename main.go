@@ -6,10 +6,11 @@ import (
 	"moviesApiProject/pkg/controllers"
 	"moviesApiProject/pkg/sqldb"
 	"net/http"
+	"os"
 )
 
 func main() {
-	sqldb.ConnectDB()
+	sqldb.ConnectDB(os.Getenv("DB_HOST"))
 
 	http.HandleFunc(controllers.ActorsBaseURL, controllers.ActorsAll)
 	http.HandleFunc(controllers.ActorsBaseURL+"/", controllers.ActorsById)
