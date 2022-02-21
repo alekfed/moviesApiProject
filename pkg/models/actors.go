@@ -7,7 +7,6 @@ import (
 	"log"
 	"moviesApiProject/pkg/sqldb"
 	"net/http"
-	"net/url"
 	"strconv"
 	"time"
 )
@@ -66,34 +65,6 @@ func NewCommonQueryParamsFromRequest(r *http.Request) (*CommonQueryParams, error
 	}
 
 	return &actorsQP, nil
-}
-
-func (a *CommonQueryParams) ValidateLimit(q url.Values) error {
-	limit, err := strconv.Atoi(q.Get("limit"))
-	if err != nil {
-		return err
-	}
-
-	if limit > LimitMax {
-		a.Limit = LimitMax
-	} else if limit > 0 {
-		a.Limit = limit
-	}
-
-	return nil
-}
-
-func (a *CommonQueryParams) ValidateOffset(q url.Values) error {
-	offset, err := strconv.Atoi(q.Get("offset"))
-	if err != nil {
-		return err
-	}
-
-	if offset > 0 {
-		a.Offset = offset
-	}
-
-	return nil
 }
 
 func GetActorById(id string, w http.ResponseWriter) {
