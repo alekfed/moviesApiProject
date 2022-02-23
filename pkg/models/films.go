@@ -23,6 +23,11 @@ func GetFilms(w http.ResponseWriter, r *http.Request) {
 
 	films := make([]*Film, 0)
 
+	if q.Id != nil {
+		q.Limit = 1
+		q.Offset = *q.Id - 1
+	}
+
 	query := `SELECT film_id, title, release_year, rating FROM film ORDER BY film_id LIMIT $1 OFFSET $2`
 
 	rows, err := sqldb.DB.Query(query, q.Limit, q.Offset)

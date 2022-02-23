@@ -1,7 +1,6 @@
 package models
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"log"
@@ -47,16 +46,12 @@ func GetActors(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if q.Id != nil {
-		GetActorById(*q.Id, w)
-	} else {
-		GetActorRange(w, q)
-	}
-
-}
-
-func GetActorRange(w http.ResponseWriter, q *CommonQueryParams) {
 	actors := make([]*Actor, 0)
+
+	if q.Id != nil {
+		q.Limit = 1
+		q.Offset = *q.Id - 1
+	}
 
 	query := `SELECT actor_id, first_name, last_name, last_update FROM actor ORDER BY actor_id LIMIT $1 OFFSET $2`
 
@@ -102,29 +97,4 @@ func CreateActor(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Actor added: %s %s", *actor.FirstName, *actor.LastName)
 
 	w.WriteHeader(http.StatusCreated)
-}
-
-func GetActorById(id int, w http.ResponseWriter) {
-	query := `SELECT actor_id, first_name, last_name, last_update FROM actor WHERE actor_id = $1`
-
-	row := sqldb.DB.QueryRow(query, id)
-
-	var actor Actor
-
-	err := row.Scan(&actor.ActorId, &actor.FirstName, &actor.LastName, &actor.LastUpdate)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			w.WriteHeader(http.StatusNotFound)
-		} else {
-			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
-		}
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-
-	err = json.NewEncoder(w).Encode(actor)
-	if err != nil {
-		log.Println(err)
-	}
 }
