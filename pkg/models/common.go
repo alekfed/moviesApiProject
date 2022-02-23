@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -15,34 +16,40 @@ const (
 type CommonQueryParams struct {
 	Offset int
 	Limit  int
+	Id     *int
 }
 
 func NewCommonQueryParamsFromRequest(r *http.Request) (*CommonQueryParams, error) {
-	actorsQP := CommonQueryParams{
+	qResult := CommonQueryParams{
 		Limit:  LimitDefault,
 		Offset: OffsetDefault,
 	}
 
-	q := r.URL.Query()
+	qRequest := r.URL.Query()
 
-	if q.Has("limit") {
-		err := actorsQP.ValidateLimit(q)
+	if qRequest.Has("limit") {
+		err := qResult.validateLimit(qRequest)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if qRequest.Has("offset") {
+		err := qResult.validateOffset(qRequest)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if qRequest.Has("id") {
+		err := qResult.validateId(qRequest)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	if q.Has("offset") {
-		err := actorsQP.ValidateOffset(q)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return &actorsQP, nil
+	return &qResult, nil
 }
 
-func (a *CommonQueryParams) ValidateLimit(q url.Values) error {
+func (a *CommonQueryParams) validateLimit(q url.Values) error {
 	limit, err := strconv.Atoi(q.Get("limit"))
 	if err != nil {
 		return err
@@ -57,7 +64,7 @@ func (a *CommonQueryParams) ValidateLimit(q url.Values) error {
 	return nil
 }
 
-func (a *CommonQueryParams) ValidateOffset(q url.Values) error {
+func (a *CommonQueryParams) validateOffset(q url.Values) error {
 	offset, err := strconv.Atoi(q.Get("offset"))
 	if err != nil {
 		return err
@@ -66,6 +73,21 @@ func (a *CommonQueryParams) ValidateOffset(q url.Values) error {
 	if offset > 0 {
 		a.Offset = offset
 	}
+
+	return nil
+}
+
+func (a *CommonQueryParams) validateId(q url.Values) error {
+	id, err := strconv.Atoi(q.Get("id"))
+	if err != nil {
+		return err
+	}
+
+	if id <= 0 {
+		return errors.New(`"id" must be a positive integer`)
+	}
+
+	a.Id = &id
 
 	return nil
 }

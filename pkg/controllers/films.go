@@ -5,9 +5,7 @@ import (
 	"net/http"
 )
 
-const BaseFilmsURL = "/films"
-
-func FilmsAll(w http.ResponseWriter, r *http.Request) {
+func Films(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		models.GetFilms(w, r)

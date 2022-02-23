@@ -7,7 +7,6 @@ import (
 	"log"
 	"moviesApiProject/pkg/sqldb"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -34,25 +33,11 @@ func NewCreateActorInputFromRequest(r *http.Request) (*CreateActorInput, error) 
 	if input.FirstName == nil {
 		return nil, errors.New(`"first_name" is required`)
 	}
-
 	if input.LastName == nil {
 		return nil, errors.New(`"last_name" is required`)
 	}
 
 	return &input, nil
-}
-
-func ValidateActorId(id string) error {
-	parsedId, err := strconv.Atoi(id)
-	if err != nil {
-		return err
-	}
-
-	if parsedId < 1 {
-		return errors.New(`"id" must be greater than 0`)
-	}
-
-	return nil
 }
 
 func GetActors(w http.ResponseWriter, r *http.Request) {
@@ -62,6 +47,15 @@ func GetActors(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if q.Id != nil {
+		GetActorById(*q.Id, w)
+	} else {
+		GetActorRange(w, q)
+	}
+
+}
+
+func GetActorRange(w http.ResponseWriter, q *CommonQueryParams) {
 	actors := make([]*Actor, 0)
 
 	query := `SELECT actor_id, first_name, last_name, last_update FROM actor ORDER BY actor_id LIMIT $1 OFFSET $2`
@@ -110,20 +104,14 @@ func CreateActor(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func GetActorById(id string, w http.ResponseWriter) {
-	err := ValidateActorId(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
+func GetActorById(id int, w http.ResponseWriter) {
 	query := `SELECT actor_id, first_name, last_name, last_update FROM actor WHERE actor_id = $1`
 
 	row := sqldb.DB.QueryRow(query, id)
 
 	var actor Actor
 
-	err = row.Scan(&actor.ActorId, &actor.FirstName, &actor.LastName, &actor.LastUpdate)
+	err := row.Scan(&actor.ActorId, &actor.FirstName, &actor.LastName, &actor.LastUpdate)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)

@@ -12,10 +12,8 @@ import (
 func main() {
 	sqldb.ConnectDB(os.Getenv("DB_HOST"))
 
-	http.HandleFunc(controllers.ActorsBaseURL, controllers.ActorsAll)
-	http.HandleFunc(controllers.ActorsBaseURL+"/", controllers.ActorsById)
-
-	http.HandleFunc(controllers.BaseFilmsURL, controllers.FilmsAll)
+	http.HandleFunc("/actors", controllers.Actors)
+	http.HandleFunc("/films", controllers.Films)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
